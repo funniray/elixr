@@ -1,13 +1,13 @@
 package us.dhmc.elixr;
 
+import cn.nukkit.Player;
+import cn.nukkit.block.Block;
+import cn.nukkit.level.format.Chunk;
+import cn.nukkit.math.Vector3;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 
 public class ChunkUtils {
 	
@@ -17,9 +17,9 @@ public class ChunkUtils {
 	 * @param player
 	 * @param blocks
 	 */
-	public static void resetPreviewBoundaryBlocks( Player player, List<Block> blocks ){
+	public static void resetPreviewBoundaryBlocks(Player player, List<Block> blocks) {
 		for (Block block : blocks){
-			player.sendBlockChange(block.getLocation(), block.getType(), block.getData());
+			//TODO: player.sendBlockChange(block.getLocation(), block.getType(), block.getData());
 		}
 	}
 	
@@ -29,9 +29,9 @@ public class ChunkUtils {
 	 * @param player
 	 * @param blocks
 	 */
-	public static void setPreviewBoundaryBlocks( Player player, List<Block> blocks, Material m ){
+	public static void setPreviewBoundaryBlocks(Player player, List<Block> blocks, int m) {
 		for (Block block : blocks){
-			player.sendBlockChange(block.getLocation(), m, (byte)0);
+			//TODO: player.sendBlockChange(block.getLocation(), m, (byte)0);
 		}
 	}
 	
@@ -41,10 +41,10 @@ public class ChunkUtils {
 	 * @param chunk
 	 * @return
 	 */
-	public static Vector getChunkMinVector( Chunk chunk ){
+	public static Vector3 getChunkMinVector(Chunk chunk) {
 		int blockMinX = chunk.getX() * 16;
 		int blockMinZ = chunk.getZ() * 16;
-		return new Vector(blockMinX, 0, blockMinZ);
+		return new Vector3(blockMinX, 0, blockMinZ);
 	}
 	
 	
@@ -53,47 +53,23 @@ public class ChunkUtils {
 	 * @param chunk
 	 * @return
 	 */
-	public static Vector getChunkMaxVector( Chunk chunk ){
+	public static Vector3 getChunkMaxVector(Chunk chunk) {
 		int blockMinX = chunk.getX() * 16;
 		int blockMinZ = chunk.getZ() * 16;
 		int blockMaxX = blockMinX + 15;
 		int blockMaxZ = blockMinZ + 15;
-		return new Vector(blockMaxX, chunk.getWorld().getMaxHeight(), blockMaxZ);
+		return new Vector3(blockMaxX, 254, blockMaxZ);
 	}
 
 	
 	/**
-	 * Returns an array of boundary blocks at a single Y for the current chunk
+	 * Returns an array of boundary blocks at a single Y for the current chunk TODO
 	 * @param chunk
 	 * @return
 	 */
 	public static ArrayList<Block> getBoundingBlocksAtY( Chunk chunk, int y ){
-		
-		int blockMinX = chunk.getX() * 16;
-		int blockMinZ = chunk.getZ() * 16;
-		int blockMaxX = blockMinX + 15;
-		int blockMaxZ = blockMinZ + 15;
-		
-		ArrayList<Block> blocks = new ArrayList<Block>();
-		
-		// MinX -> MinZ
-	    for ( int x = blockMinX; x < blockMaxX; x++ ){
-	    	blocks.add( chunk.getWorld().getBlockAt(x, y, blockMinZ) );
-	    }
-    	// MinX -> MaxZ
-	    for ( int x = blockMinX; x < blockMaxX; x++ ){
-	    	blocks.add( chunk.getWorld().getBlockAt(x, y, blockMaxZ) );
-	    }
-	    // MinZ -> MinX
-    	for ( int z = blockMinZ; z < blockMaxZ; z++ ){
-    		blocks.add( chunk.getWorld().getBlockAt(blockMinX, y, z) );
-    	}
-    	// MinZ -> MaxX
-    	for ( int z = blockMinZ; z < blockMaxZ; z++ ){
-    		blocks.add( chunk.getWorld().getBlockAt(blockMaxX, y, z) );
-    	}
-    	
-	    return blocks;
+
+		return null;
 	    
 	}
 }

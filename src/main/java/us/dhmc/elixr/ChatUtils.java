@@ -1,19 +1,15 @@
 package us.dhmc.elixr;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
+
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.level.Location;
 
 public class ChatUtils {
-    
-    /**
-     * 
-     * @param player
-     * @param msg
-     */
-    public static void notifyNearby( Location loc, int radius, String msg ){
-        for ( final Player p : Bukkit.getServer().getOnlinePlayers() ) {
-            if( loc.getWorld().equals( p.getWorld() ) ) {
+
+    public static void notifyNearby(Location loc, int radius, String msg) {
+        for (final Player p : Server.getInstance().getOnlinePlayers().values()) {
+            if (loc.getLevel().equals(p.getLevel())) {
                 if( loc.distance( p.getLocation() ) <= radius ) {
                     p.sendMessage( msg );
                 }

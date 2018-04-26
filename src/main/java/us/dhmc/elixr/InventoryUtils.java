@@ -1,15 +1,13 @@
 package us.dhmc.elixr;
 
+import cn.nukkit.Player;
+import cn.nukkit.inventory.Inventory;
+import cn.nukkit.inventory.PlayerInventory;
+import cn.nukkit.item.Item;
+
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 /**
  * 
@@ -24,7 +22,7 @@ public class InventoryUtils {
      */
     @SuppressWarnings("deprecation")
     public static void updateInventory( Player p ){
-        p.updateInventory();
+        //p.updateInventory();
     }
     
     /**
@@ -33,7 +31,7 @@ public class InventoryUtils {
      * @return
      */
     public static boolean playerInvIsEmpty( Player p ){
-        for( ItemStack item : p.getInventory().getContents() ){
+        for (Item item : p.getInventory().getContents().values()) {
             if( item != null ) return false;
         }
         return true;
@@ -45,8 +43,8 @@ public class InventoryUtils {
      * @return
      */
     public static boolean playerArmorIsEmpty( Player p ){
-        for( ItemStack item : p.getInventory().getArmorContents() ){
-            if( item != null && !item.getType().equals( Material.AIR ) ) return false;
+        for (Item item : p.getInventory().getArmorContents()) {
+            if (item != null && item.getId() != 0) return false;
         }
         return true;
     }
@@ -58,10 +56,10 @@ public class InventoryUtils {
 	 * @param sub_id
 	 * @return
 	 */
-	public static int inventoryHasItem( Inventory inv, int item_id, int sub_id ){
+    public static int inventoryHasItem(Inventory inv, int item_id, int sub_id) {
 		int currentSlot = 0;
-		for(ItemStack item : inv.getContents()){
-			if( item != null && item.getTypeId() == item_id && item.getDurability() == sub_id ){
+        for (Item item : inv.getContents().values()) {
+            if (item != null && item.getId() == item_id && item.getDamage() == sub_id) {
 				return currentSlot;
 			}
 			currentSlot++;
@@ -75,17 +73,17 @@ public class InventoryUtils {
      * @param desiredQuantity
      * @return
      */
-    public static ItemStack extractItemsMatchingHeldItemFromPlayer( Player player, int desiredQuantity ){
-        
-        if( player == null || !ItemUtils.isValidItem( player.getItemInHand() ) ){
+    public static Item extractItemsMatchingHeldItemFromPlayer(Player player, int desiredQuantity) {
+
+        if (player == null || !ItemUtils.isValidItem(player.getInventory().getItemInHand())) {
             throw new IllegalArgumentException("Invalid player or invalid held item.");
         }
         
         int quantityFound = 0;
-        ItemStack itemDefinition = player.getItemInHand().clone();
+        Item itemDefinition = player.getInventory().getItemInHand().clone();
         
         for( int slot = 0; slot < player.getInventory().getSize(); slot++ ){
-            ItemStack item = player.getInventory().getItem( slot );
+            Item item = player.getInventory().getItem(slot);
             if( item == null ) continue;
             if( ItemUtils.equals( item, itemDefinition, true ) ){
                 
@@ -93,21 +91,21 @@ public class InventoryUtils {
                 int diff = desiredQuantity - quantityFound;
 
                 // Consume whole stack
-                if( diff > item.getAmount() ){
-                    quantityFound += item.getAmount();
+                if (diff > item.getCount()) {
+                    quantityFound += item.getCount();
                     player.getInventory().clear(slot);
                 }
                 // Only need a portion
                 else {
                    quantityFound += diff;
-                   item.setAmount( item.getAmount() - diff );
+                    item.setCount(item.getCount() - diff);
                    player.getInventory().setItem( slot, item );
                 }
             }
             if( desiredQuantity == quantityFound ) break;
         }
-        
-        itemDefinition.setAmount( quantityFound );
+
+        itemDefinition.setCount(quantityFound);
         
         return itemDefinition;
         
@@ -120,10 +118,10 @@ public class InventoryUtils {
 	 * @param sub_id
 	 * @return
 	 */
-	public static boolean moveItemToHand( PlayerInventory inv, int item_id, byte sub_id ){
+    public static boolean moveItemToHand(PlayerInventory inv, int item_id, byte sub_id) {
 		int slot = inventoryHasItem( inv, item_id, sub_id );
 		if( slot > -1 ){
-			ItemStack item = inv.getItem(slot);
+            Item item = inv.getItem(slot);
 			inv.clear(slot);
 			// If the player has an item in-hand, switch to a vacant spot
 			if( !playerHasEmptyHand(inv) ){
@@ -141,25 +139,17 @@ public class InventoryUtils {
 	 * @return
 	 */
 	public static boolean playerHasEmptyHand( PlayerInventory inv ){
-		return (inv.getItemInHand().getTypeId() == 0);
-	}
-	
-	/**
-	 * Adds an item to the inventory, returns a hashmap of leftovers
-	 * @param player
-	 */
-	public static HashMap<Integer,ItemStack> addItemToInventory( Inventory inv, ItemStack item ){
+        return (inv.getItemInHand().getId() == 0);
+    }
+
+    public static Item[] addItemToInventory(Inventory inv, Item item) {
 		return inv.addItem(item);
 	}
-	
-	/**
-	 * 
-	 * @param player
-	 */
-	public static boolean handItemToPlayer( PlayerInventory inv, ItemStack item ){
+
+    public static boolean handItemToPlayer(PlayerInventory inv, Item item) {
 		// Ensure there's at least one empty inv spot
-		if( inv.firstEmpty() != -1 ){
-			ItemStack originalItem = inv.getItemInHand().clone();
+        if (inv.firstEmpty(new Item(0)) != -1) {
+            Item originalItem = inv.getItemInHand().clone();
 			// If the player has an item in-hand, switch to a vacant spot
 			if( !playerHasEmptyHand( inv ) ){
 				// We need to manually add the item stack to a different
@@ -167,8 +157,8 @@ public class InventoryUtils {
 				// and that was causing items to be lost unless they were the max
 				// stack size
 				for(int i = 0; i <= inv.getSize(); i++){
-					if( i == inv.getHeldItemSlot() ) continue;
-					ItemStack current = inv.getItem(i);
+                    if (i == inv.getHeldItemIndex()) continue;
+                    Item current = inv.getItem(i);
 					if( current == null ){
 						inv.setItem(i, originalItem);
 						break;
@@ -188,10 +178,10 @@ public class InventoryUtils {
 	 * @param quant
 	 */
 	public static void subtractAmountFromPlayerInvSlot( PlayerInventory inv, int slot, int quant ){
-		ItemStack itemAtSlot = inv.getItem(slot);
+        Item itemAtSlot = inv.getItem(slot);
 		if( itemAtSlot != null && quant <= 64 ){
-			itemAtSlot.setAmount( itemAtSlot.getAmount() - quant );
-			if( itemAtSlot.getAmount() == 0 ){
+            itemAtSlot.setCount(itemAtSlot.getCount() - quant);
+            if (itemAtSlot.getCount() == 0) {
 				inv.clear(slot);
 			}
 		}
@@ -202,10 +192,10 @@ public class InventoryUtils {
 	 * @param leftovers
 	 * @param player
 	 */
-	public static void dropItemsByPlayer( HashMap<Integer,ItemStack> leftovers, Player player ){
+    public static void dropItemsByPlayer(HashMap<Integer, Item> leftovers, Player player) {
 		if(!leftovers.isEmpty()){
-			for (Entry<Integer, ItemStack> entry : leftovers.entrySet()){
-			    player.getWorld().dropItemNaturally(player.getLocation(), entry.getValue());
+            for (Entry<Integer, Item> entry : leftovers.entrySet()) {
+                player.getLevel().dropItem(player.getLocation(), entry.getValue());
 			}
 		}
 	}
@@ -220,51 +210,30 @@ public class InventoryUtils {
 		if (in == null) {
 			return true;
 		}
-		for (ItemStack item : in.getContents()) {
+        for (Item item : in.getContents().values()) {
 			ret |= (item != null);
 		}
 		return !ret;
 	}
-	
-	/**
-	 * 
-	 * @param player
-	 * @param target
-	 * @return
-	 * @throws Exception 
-	 */
-	public static void movePlayerInventoryToContainer( PlayerInventory inv, Block target, HashMap<Integer,Short> filters ) throws Exception{
+    //TODO:
+	/*
+	public static void movePlayerInventoryToContainer(PlayerInventory inv, Block target, HashMap<Integer,Short> filters ) throws Exception{
 		InventoryHolder container = (InventoryHolder) target.getState();
 		if( !moveInventoryToInventory( inv, container.getInventory(), false, filters ) ){
 			throw new Exception("Target container is full.");
 		}
 	}
-	
-	/**
-	 * 
-	 * @param player
-	 * @param target
-	 * @return
-	 * @throws Exception 
-	 */
 	public static void moveContainerInventoryToPlayer( PlayerInventory inv, Block target, HashMap<Integer,Short> filters ) throws Exception{
 		InventoryHolder container = (InventoryHolder) target.getState();
 		moveInventoryToInventory( container.getInventory(), inv, false, filters );
 	}
-	
-	/**
-	 * 
-	 * @param player
-	 * @param chest
-	 * @param fullFlag
-	 * @return
-	 */
+
 	public static boolean moveInventoryToInventory( Inventory from, Inventory to, boolean fullFlag, HashMap<Integer,Short> filters ) {
 
-		HashMap<Integer, ItemStack> leftovers;
+		HashMap<Integer, Item> leftovers;
 
 		if (to.firstEmpty() != -1 && !fullFlag){
-			for (ItemStack item : from.getContents()) {
+			for (Item item : from.getContents()) {
 				if(to.firstEmpty() == -1){
 					return false;
 				}
@@ -297,15 +266,15 @@ public class InventoryUtils {
 		}
 		return false;
 	}
-	
+	*/
 	/**
 	 * 
 	 * @param stack
 	 * @param player
 	 * @return
 	 */
-    public static ItemStack[] sortItemStack(ItemStack[] stack, Player player) {
-        return sortItemStack(stack, 0, stack.length, player);
+    public static Item[] sortItem(Item[] stack, Player player) {
+        return sortItem(stack, 0, stack.length, player);
     }
 
     /**
@@ -316,7 +285,7 @@ public class InventoryUtils {
      * @param player
      * @return
      */
-    public static ItemStack[] sortItemStack(ItemStack[] stack, int start, int end, Player player) {
+    public static Item[] sortItem(Item[] stack, int start, int end, Player player) {
         stack = stackItems(stack, start, end);
         recQuickSort(stack, start, end - 1);
         return stack;
@@ -329,40 +298,40 @@ public class InventoryUtils {
      * @param end
      * @return
      */
-    private static ItemStack[] stackItems(ItemStack[] items, int start, int end) {
+    private static Item[] stackItems(Item[] items, int start, int end) {
         for (int i = start; i < end; i++) {
-            ItemStack item = items[i];
+            Item item = items[i];
 
             // Avoid infinite stacks and stacks with durability
-            if (item == null || item.getAmount() <= 0 || !ItemUtils.canSafelyStack( item )) {
+            if (item == null || item.getCount() <= 0 || !ItemUtils.canSafelyStack(item)) {
                 continue;
             }
 
             int max_stack = item.getMaxStackSize();
-            if (item.getAmount() < max_stack){
-                int needed = max_stack - item.getAmount(); // Number of needed items until max_stack
+            if (item.getCount() < max_stack) {
+                int needed = max_stack - item.getCount(); // Number of needed items until max_stack
 
                 // Find another stack of the same type
                 for (int j = i + 1; j < end; j++) {
-                    ItemStack item2 = items[j];
+                    Item item2 = items[j];
 
                     // Avoid infinite stacks and stacks with durability
-                    if (item2 == null || item2.getAmount() <= 0 || !ItemUtils.canSafelyStack( item )) {
+                    if (item2 == null || item2.getCount() <= 0 || !ItemUtils.canSafelyStack(item)) {
                         continue;
                     }
 
                     // Same type?
                     // Blocks store their color in the damage value
-                    if (item2.getTypeId() == item.getTypeId() && (!ItemUtils.dataValueUsedForSubitems(item.getTypeId()) || item.getDurability() == item2.getDurability())) {
+                    if (item2.getId() == item.getId() && (!ItemUtils.dataValueUsedForSubitems(item.getId()) || item.getDamage() == item2.getDamage())) {
                         // This stack won't fit in the parent stack
-                        if (item2.getAmount() > needed) {
-                            item.setAmount(max_stack);
-                            item2.setAmount(item2.getAmount() - needed);
+                        if (item2.getCount() > needed) {
+                            item.setCount(max_stack);
+                            item2.setCount(item2.getCount() - needed);
                             break;
                         } else {
-                            item.setAmount(item.getAmount() + item2.getAmount());
-                            needed = max_stack - item.getAmount();
-                            items[j].setTypeId(0);
+                            item.setCount(item.getCount() + item2.getCount());
+                            needed = max_stack - item.getCount();
+                            items[j].setCount(0);
                         }
                     }
                 }
@@ -377,8 +346,8 @@ public class InventoryUtils {
      * @param first
      * @param second
      */
-    private static void swap(ItemStack[] list, int first, int second) {
-        ItemStack temp;
+    private static void swap(Item[] list, int first, int second) {
+        Item temp;
         temp = list[first];
         list[first] = list[second];
         list[second] = temp;
@@ -391,8 +360,8 @@ public class InventoryUtils {
      * @param last
      * @return
      */
-    private static int partition(ItemStack[] list, int first, int last) {
-        ItemStack pivot;
+    private static int partition(Item[] list, int first, int last) {
+        Item pivot;
 
         int smallIndex;
 
@@ -402,8 +371,8 @@ public class InventoryUtils {
         smallIndex = first;
 
         for (int index = first + 1; index <= last; index++) {
-            
-            ItemStack item = list[index];
+
+            Item item = list[index];
 
             if( ItemUtils.equals( item, pivot ) ){
                 smallIndex++;
@@ -422,7 +391,7 @@ public class InventoryUtils {
      * @param first
      * @param last
      */
-    private static void recQuickSort(ItemStack[] list, int first, int last) {
+    private static void recQuickSort(Item[] list, int first, int last) {
         if (first < last) {
             int pivotLocation = partition(list, first, last);
             recQuickSort(list, first, pivotLocation - 1);

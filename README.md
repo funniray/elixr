@@ -1,6 +1,6 @@
 # elixr
 
-elixr is a utility API for Bukkit-based plugins. All classes contain static methods that you can use from your plugin - no other dependencies other than elixr itself. Elixr is being released as open source with the hope that you'll use and contribute new code!
+elixr is a utility API for Nukkit-based plugins. All classes contain static methods that you can use from your plugin - no other dependencies other than elixr itself. Elixr is being released as open source with the hope that you'll use and contribute new code!
 
 elixr was originally extracted from code too-often shared between our own plugins including Prism, Craftys, DarkMythos, Inventory Toolkit, Darmok, dhmcDeath, and more.
 

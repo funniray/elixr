@@ -1,14 +1,15 @@
 package us.dhmc.elixr;
 
-import java.util.ArrayList;
+import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.item.ItemID;
+import cn.nukkit.level.Location;
+import cn.nukkit.math.BlockFace;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.material.Bed;
+import java.util.ArrayList;
+import java.util.Collection;
+
 
 public class BlockUtils {
 
@@ -19,19 +20,19 @@ public class BlockUtils {
 	 * @param m the material of the block
 	 * @return if the material is acceptable to replace
 	 */
-	public static boolean isAcceptableForBlockPlace( Material m ){
+    public static boolean isAcceptableForBlockPlace(int m) {
 		switch(m){
-			case AIR:
-			case FIRE:
-			case GRAVEL:
-			case LAVA:
-            case LONG_GRASS:
-			case SAND:
-            case SNOW:
-            case SNOW_BLOCK:
-            case STATIONARY_LAVA:
-			case STATIONARY_WATER:
-            case WATER:
+            case BlockID.AIR:
+            case BlockID.FIRE:
+            case BlockID.GRAVEL:
+            case BlockID.LAVA:
+            case BlockID.TALL_GRASS:
+            case BlockID.SAND:
+            case BlockID.SNOW:
+            case BlockID.SNOW_BLOCK:
+            case BlockID.STILL_LAVA:
+            case BlockID.STILL_WATER:
+            case BlockID.WATER:
 				return true;
 			default:
 				return false;
@@ -45,11 +46,11 @@ public class BlockUtils {
 	 * @param block the block to fetch blocks above
 	 * @return the list of blocks directly above the block
 	 */
-	public static ArrayList<Block> findFallingBlocksAboveBlock( final Block block ){
+    public static ArrayList<Block> findFallingBlocksAboveBlock(final Block block) {
 		ArrayList<Block> falling_blocks = new ArrayList<Block>();
 		
 		// Get block above
-		Block above = block.getRelative(BlockFace.UP);
+        Block above = block.getSide(BlockFace.UP);
 		if(BlockUtils.isFallingBlock(above)){
 			falling_blocks.add(above);
 			ArrayList<Block> fallingBlocksAbove = findFallingBlocksAboveBlock( above );
@@ -70,12 +71,12 @@ public class BlockUtils {
 	 * @return whether the block is capable of falling
 	 */
 	public static boolean isFallingBlock( Block block ){
-		Material m = block.getType();
+        int m = block.getId();
 
         switch (m){
-            case SAND:
-            case GRAVEL:
-            case ANVIL:
+            case BlockID.SAND:
+            case BlockID.GRAVEL:
+            case BlockID.ANVIL:
                 return true;
             default:
                 return false;
@@ -93,20 +94,20 @@ public class BlockUtils {
 		ArrayList<Block> detaching_blocks = new ArrayList<Block>();
 		
 		// Check each of the four sides
-		Block blockToCheck = block.getRelative(BlockFace.EAST);
-		if(BlockUtils.isSideFaceDetachableMaterial(blockToCheck.getType())){
+        Block blockToCheck = block.getSide(BlockFace.EAST);
+        if (BlockUtils.isSideFaceDetachableMaterial(blockToCheck.getId())) {
 			detaching_blocks.add(blockToCheck);
 		}
-		blockToCheck = block.getRelative(BlockFace.WEST);
-		if(BlockUtils.isSideFaceDetachableMaterial(blockToCheck.getType())){
+        blockToCheck = block.getSide(BlockFace.WEST);
+        if (BlockUtils.isSideFaceDetachableMaterial(blockToCheck.getId())) {
 			detaching_blocks.add(blockToCheck);
 		}
-		blockToCheck = block.getRelative(BlockFace.NORTH);
-		if(BlockUtils.isSideFaceDetachableMaterial(blockToCheck.getType())){
+        blockToCheck = block.getSide(BlockFace.NORTH);
+        if (BlockUtils.isSideFaceDetachableMaterial(blockToCheck.getId())) {
 			detaching_blocks.add(blockToCheck);
 		}
-		blockToCheck = block.getRelative(BlockFace.SOUTH);
-		if(BlockUtils.isSideFaceDetachableMaterial(blockToCheck.getType())){
+        blockToCheck = block.getSide(BlockFace.SOUTH);
+        if (BlockUtils.isSideFaceDetachableMaterial(blockToCheck.getId())) {
 			detaching_blocks.add(blockToCheck);
 		}
 		
@@ -121,21 +122,21 @@ public class BlockUtils {
 	 * @param m the material of the surrounding block to look for
 	 * @return the first surrounding block of the given material found
 	 */
-	public static Block findFirstSurroundingBlockOfType( Block block, Material m){
-		Block blockToCheck = block.getRelative(BlockFace.EAST);
-		if( blockToCheck.getType().equals(m) ){
+    public static Block findFirstSurroundingBlockOfType(Block block, int m) {
+        Block blockToCheck = block.getSide(BlockFace.EAST);
+        if (blockToCheck.getId() == m) {
 			return blockToCheck;
 		}
-		blockToCheck = block.getRelative(BlockFace.WEST);
-		if( blockToCheck.getType().equals(m) ){
+        blockToCheck = block.getSide(BlockFace.WEST);
+        if (blockToCheck.getId() == m) {
 			return blockToCheck;
 		}
-		blockToCheck = block.getRelative(BlockFace.NORTH);
-		if( blockToCheck.getType().equals(m) ){
+        blockToCheck = block.getSide(BlockFace.NORTH);
+        if (blockToCheck.getId() == m) {
 			return blockToCheck;
 		}
-		blockToCheck = block.getRelative(BlockFace.SOUTH);
-		if( blockToCheck.getType().equals(m) ){
+        blockToCheck = block.getSide(BlockFace.SOUTH);
+        if (blockToCheck.getId() == m) {
 			return blockToCheck;
 		}
 		return null;
@@ -148,29 +149,26 @@ public class BlockUtils {
 	 * @param m the material to check for detaching
 	 * @return whether a block with a given material will detach from the side of a block
 	 */
-	public static boolean isSideFaceDetachableMaterial( Material m ){
+    public static boolean isSideFaceDetachableMaterial(int m) {
         switch (m){
-            case BANNER:
-            case COCOA:
-            case WALL_SIGN:
-            case LADDER:
-            case LEVER:
-            case IRON_TRAPDOOR:
-            case PORTAL:
-            case PISTON_BASE: // Fake entry, the base always breaks if the extension is lost
-            case PISTON_EXTENSION:
-            case PISTON_MOVING_PIECE:
-            case PISTON_STICKY_BASE:
-            case REDSTONE_TORCH_OFF:
-            case REDSTONE_TORCH_ON:
-            case STANDING_BANNER:
-            case STONE_BUTTON:
-            case TRAP_DOOR:
-            case TORCH:
-            case TRIPWIRE_HOOK:
-            case WALL_BANNER:
-            case WOOD_BUTTON:
-            case VINE:
+            case BlockID.COCOA:
+            case BlockID.WALL_SIGN:
+            case BlockID.LADDER:
+            case BlockID.LEVER:
+            case BlockID.IRON_TRAPDOOR:
+            case BlockID.NETHER_PORTAL:
+            case BlockID.PISTON: // Fake entry, the base always breaks if the extension is lost
+            case BlockID.PISTON_EXTENSION:
+            case BlockID.PISTON_HEAD:
+            case BlockID.STICKY_PISTON:
+            case BlockID.REDSTONE_TORCH:
+            case BlockID.UNLIT_REDSTONE_TORCH:
+            case BlockID.STONE_BUTTON:
+            case BlockID.TRAPDOOR:
+            case BlockID.TORCH:
+            case BlockID.TRIPWIRE_HOOK:
+            case BlockID.WOODEN_BUTTON:
+            case BlockID.VINE:
                 return true;
             default:
                 return false;
@@ -187,10 +185,10 @@ public class BlockUtils {
 		ArrayList<Block> detaching_blocks = new ArrayList<Block>();
 		
 		// Find any block on top of this that will detach
-		Block blockToCheck = block.getRelative(BlockFace.UP);
-		if(BlockUtils.isTopFaceDetachableMaterial(blockToCheck.getType())){
+        Block blockToCheck = block.getSide(BlockFace.UP);
+        if (BlockUtils.isTopFaceDetachableMaterial(blockToCheck.getId())) {
 			detaching_blocks.add(blockToCheck);
-			if( blockToCheck.getType().equals(Material.CACTUS) || blockToCheck.getType().equals(Material.SUGAR_CANE_BLOCK) ){
+            if (blockToCheck.getId() == BlockID.CACTUS || blockToCheck.getId() == BlockID.SUGARCANE_BLOCK) {
 				// For cactus and sugar cane, we can even have blocks above
 				ArrayList<Block> additionalBlocks = findTopFaceAttachedBlocks(blockToCheck);
 				if(!additionalBlocks.isEmpty()){
@@ -213,59 +211,50 @@ public class BlockUtils {
 	 * @param m the material to check for detaching
 	 * @return whether a block with a given material will detach from the top of a block
 	 */
-	public static boolean isTopFaceDetachableMaterial( Material m ){
+    public static boolean isTopFaceDetachableMaterial(int m) {
 		switch(m){
-            case ACTIVATOR_RAIL:
-            case BANNER:
-			case BROWN_MUSHROOM:
-			case CACTUS:
-			case CARROT:
-            case CROPS:
-			case DEAD_BUSH:
-			case DETECTOR_RAIL:
-            case DIODE:
-            case DIODE_BLOCK_OFF:
-            case DIODE_BLOCK_ON:
-			case DOUBLE_PLANT:
-            case FLOWER_POT:
-			case GOLD_PLATE:
-			case IRON_DOOR:
-			case IRON_DOOR_BLOCK:
-			case IRON_PLATE:
-			case LEVER:
-			case LONG_GRASS:
-			case MELON_STEM:
-			case NETHER_WARTS:
-			case PORTAL:
-            case POTATO:
-			case POWERED_RAIL:
-			case PUMPKIN_STEM:
-			case RAILS:
-			case RED_MUSHROOM:
-			case RED_ROSE:
-			case REDSTONE:
-			case REDSTONE_COMPARATOR_OFF:
-			case REDSTONE_COMPARATOR_ON:
-			case REDSTONE_TORCH_OFF:
-			case REDSTONE_TORCH_ON:
-			case REDSTONE_WIRE:
-			case SAPLING:
-			case SIGN:
-			case SIGN_POST:
-			case SKULL:
-			case SNOW:
-            case STANDING_BANNER:
-			case STONE_PLATE:
-            case SUGAR_CANE_BLOCK:
-			case TORCH:
-			case TRIPWIRE:
-            case WALL_BANNER:
-			case WATER_LILY:
-			case WHEAT:
-			case WOOD_DOOR:
-			case WOOD_PLATE:
-			case WOODEN_DOOR:
-			case YELLOW_FLOWER:
+            case BlockID.ACTIVATOR_RAIL:
+            case BlockID.BROWN_MUSHROOM:
+            case BlockID.CACTUS:
+            case BlockID.CARROT_BLOCK:
+            case BlockID.DEAD_BUSH:
+            case BlockID.DETECTOR_RAIL:
+            case BlockID.DOUBLE_PLANT:
+            case BlockID.FLOWER_POT_BLOCK:
+            case BlockID.HEAVY_WEIGHTED_PRESSURE_PLATE:
+            case BlockID.IRON_TRAPDOOR:
+            case BlockID.IRON_DOOR_BLOCK:
+            case BlockID.LIGHT_WEIGHTED_PRESSURE_PLATE:
+            case BlockID.LEVER:
+            case BlockID.TALL_GRASS:
+            case BlockID.MELON_STEM:
+            case BlockID.NETHER_WART_BLOCK:
+            case BlockID.POTATO_BLOCK:
+            case BlockID.POWERED_RAIL:
+            case BlockID.PUMPKIN_STEM:
+            case BlockID.RAIL:
+            case BlockID.RED_MUSHROOM:
+            case BlockID.ROSE:
+            case ItemID.REDSTONE:
+            case BlockID.POWERED_COMPARATOR:
+            case BlockID.UNPOWERED_COMPARATOR:
+            case BlockID.REDSTONE_TORCH:
+            case BlockID.UNLIT_REDSTONE_TORCH:
+            case BlockID.REDSTONE_WIRE:
+            case BlockID.SAPLING:
+            case BlockID.WALL_SIGN:
+            case BlockID.SIGN_POST:
+            case BlockID.SKULL_BLOCK:
+            case BlockID.SNOW:
+            case BlockID.STONE_PRESSURE_PLATE:
+            case BlockID.SUGARCANE_BLOCK:
+            case BlockID.TORCH:
+            case BlockID.TRIPWIRE:
+            case BlockID.WATER_LILY:
+            case BlockID.WHEAT_BLOCK:
+            case BlockID.WOOD_DOOR_BLOCK:
+            case BlockID.WOODEN_PRESSURE_PLATE:
+            case BlockID.DANDELION:
 				return true;
 			default:
 				return false;
@@ -281,14 +270,14 @@ public class BlockUtils {
 	 * @param m
 	 * @return
 	 */
-	public static boolean materialMeansBlockDetachment(Material m){
+    public static boolean materialMeansBlockDetachment(int m) {
 		switch(m){
-			case AIR:
-			case FIRE:
-			case WATER:
-			case STATIONARY_WATER:
-			case LAVA:
-			case STATIONARY_LAVA:
+            case 0:
+            case BlockID.FIRE:
+            case BlockID.WATER:
+            case BlockID.STILL_WATER:
+            case BlockID.LAVA:
+            case BlockID.STILL_LAVA:
 				return true;
 			default:
 				return false;
@@ -302,18 +291,19 @@ public class BlockUtils {
 	 * @param block
 	 * @return
 	 */
-	public static ArrayList<Entity> findHangingEntities( final Block block ){
+    public static ArrayList<Entity> findHangingEntities(final Block block) {
 		
 		ArrayList<Entity> entities = new ArrayList<Entity>();
-		
-		Entity[] foundEntities = block.getChunk().getEntities();
-		if(foundEntities.length > 0){
+
+
+        Collection<Entity> foundEntities = block.getLevel().getChunk(block.getChunkX(), block.getChunkZ()).getEntities().values();
+        if (foundEntities.size() > 0) {
 			for(Entity e : foundEntities){
 				// Some modded servers seems to list entities in the chunk
 				// that exists in other worlds. No idea why but we can at
 				// least check for it.
 				// https://snowy-evening.com/botsko/prism/318/
-				if( !block.getWorld().equals( e.getWorld() ) ) continue;
+                if (!block.getLevel().equals(e.getLevel())) continue;
 				// Let's limit this to only entities within 1 block of the current.
 				if( block.getLocation().distance( e.getLocation() ) < 2 && isHangingEntity(e) ){
 					entities.add(e);
@@ -332,11 +322,11 @@ public class BlockUtils {
 	 * @return if an entity is a hanging type attachable to a block
 	 */
 	public static boolean isHangingEntity( Entity entity ){
-		EntityType type = entity.getType();
+        int type = (int) entity.getId();
 
         switch (type) {
-            case ITEM_FRAME:
-            case PAINTING:
+            case ItemID.ITEM_FRAME:
+            case ItemID.PAINTING:
                 return true;
             default:
                 return false;
@@ -353,34 +343,8 @@ public class BlockUtils {
 		/**
 		 * Handle special double-length blocks
 		 */
-        switch (block.getType()) {
-            case ACACIA_DOOR:
-            case BIRCH_DOOR:
-            case DARK_OAK_DOOR:
-            case JUNGLE_DOOR:
-            case IRON_DOOR_BLOCK:
-            case SPRUCE_DOOR:
-            case WOODEN_DOOR:
-                if(block.getData() == 8 || block.getData() == 9) {
-                    return block.getRelative(BlockFace.DOWN);
-                }
-                break;
-            case DOUBLE_PLANT:
-                if(block.getData() == 10) {
-                    return block.getRelative(BlockFace.DOWN);
-                }
-                break;
-            case BED_BLOCK:
-                Bed b = (Bed)block.getState().getData();
-                if(b.isHeadOfBed()){
-                    return block.getRelative(b.getFacing().getOppositeFace());
-                }
-                break;
-            case CHEST:
-                return findFirstSurroundingBlockOfType(block, block.getType());
-            case TRAPPED_CHEST:
-                return findFirstSurroundingBlockOfType(block, block.getType());
-        }
+
+        //I don't think this is used in Nukkit
 
         return null;
 	}
@@ -490,46 +454,7 @@ public class BlockUtils {
 	 * @param subid
 	 */
 	public static void properlySetDoor( Block originalBlock, int typeid, byte subid ){
-		// Wood door upper or iron door upper
-		if( subid == 8 || subid == 9 ){ // 8 for single doors or left side of double, 9 for right side of double
-			Block aboveOrBelow = originalBlock.getRelative(BlockFace.DOWN);
-			aboveOrBelow.setTypeId( typeid );
-			aboveOrBelow.setData( (byte)0 ); // we have no way to know which direction the lower half was facing
-		}
-		// Wood door lower or iron door lower
-		else {
-			Block aboveOrBelow = originalBlock.getRelative(BlockFace.UP);
-			aboveOrBelow.setTypeId( typeid );
-			// Determine the directing the bottom half is facing, then check
-			// it's left side for an existing door, because the subid changes
-			// if we're on the right.
-			Block left = null;
-			switch(subid){
-				case 0:
-					// Back faces east
-					left = originalBlock.getRelative(BlockFace.NORTH);
-					break;
-				case 1:
-					// Back faces south
-					left = originalBlock.getRelative(BlockFace.EAST);
-					break;
-				case 2:
-					// Back faces west
-					left = originalBlock.getRelative(BlockFace.SOUTH);
-					break;
-				case 3:
-					// Back faces north
-					left = originalBlock.getRelative(BlockFace.WEST);
-					break;
-			}
-			if(aboveOrBelow != null){
-				if( left != null && isDoor(left.getType()) ){
-					aboveOrBelow.setData( (byte)9 );
-				} else {
-					aboveOrBelow.setData( (byte)8 );
-				}
-			}
-		}
+        //Not used in Nukkit
 	}
 	
 	
@@ -539,17 +464,15 @@ public class BlockUtils {
 	 * @param m the material to check for being a door material
 	 * @return whether the material is a door material
 	 */
-	public static boolean isDoor(Material m){
+    public static boolean isDoor(int m) {
 		switch(m){
-            case ACACIA_DOOR:
-            case BIRCH_DOOR:
-            case DARK_OAK_DOOR:
-            case JUNGLE_DOOR:
-            case IRON_DOOR:
-            case IRON_DOOR_BLOCK:
-            case SPRUCE_DOOR:
-			case WOOD_DOOR:
-			case WOODEN_DOOR:
+            case BlockID.ACACIA_DOOR_BLOCK:
+            case BlockID.BIRCH_DOOR_BLOCK:
+            case BlockID.DARK_OAK_DOOR_BLOCK:
+            case BlockID.JUNGLE_DOOR_BLOCK:
+            case BlockID.IRON_DOOR_BLOCK:
+            case BlockID.SPRUCE_DOOR_BLOCK:
+            case BlockID.WOOD_DOOR_BLOCK:
 				return true;
 			default:
 				return false;
@@ -570,25 +493,25 @@ public class BlockUtils {
 		int new_subid = 0;
 		switch(subid){
 			case 3:
-				top = originalBlock.getRelative(BlockFace.EAST);
+                top = originalBlock.getSide(BlockFace.EAST);
 				new_subid = 11;
 				break;
 			case 2:
-				top = originalBlock.getRelative(BlockFace.NORTH);
+                top = originalBlock.getSide(BlockFace.NORTH);
 				new_subid = 10;
 				break;
 			case 1:
-				top = originalBlock.getRelative(BlockFace.WEST);
+                top = originalBlock.getSide(BlockFace.WEST);
 				new_subid = 9;
 				break;
 			case 0:
-				top = originalBlock.getRelative(BlockFace.SOUTH);
+                top = originalBlock.getSide(BlockFace.SOUTH);
 				new_subid = 8;
 				break;
 		}
 		if(top != null){
-			top.setTypeId(typeid);
-			top.setData((byte)new_subid);
+            //top.setTypeId(typeid); TODO:
+            //top.setData((byte)new_subid);
 		} else {
 			System.out.println("Error setting bed: block top location was illegal. Data value: " + subid + " New data value: " + new_subid);
 		}
@@ -603,13 +526,13 @@ public class BlockUtils {
 	 * @param subid
 	 */
 	public static void properlySetDoublePlant( Block originalBlock, int typeid, byte subid ){
-		if( !originalBlock.getType().equals(Material.DOUBLE_PLANT) ) return;
-		Block above = originalBlock.getRelative(BlockFace.UP);
-		if( !isAcceptableForBlockPlace( above.getType() ) ) return;
+        if (originalBlock.getId() != BlockID.DOUBLE_PLANT) return;
+        Block above = originalBlock.getSide(BlockFace.UP);
+        if (!isAcceptableForBlockPlace(above.getId())) return;
 		// choose an acceptable subid
 		if( typeid == 175 && subid < 8 ) subid = 8;
-		above.setTypeId(typeid);
-		above.setData((byte)subid);
+        //above.setTypeId(typeid); TODO
+        //above.setData((byte)subid);
 	}
 	
 	
@@ -618,56 +541,49 @@ public class BlockUtils {
 	 * @param m
 	 * @return
 	 */
-	public static boolean canFlowBreakMaterial(Material m){
+    public static boolean canFlowBreakMaterial(int m) {
 		switch(m){
-			case ACTIVATOR_RAIL:
-			case BROWN_MUSHROOM:
-			case CACTUS:
-			case CARROT:
-			case COCOA: // different from pop off list
-			case DEAD_BUSH:
-			case DETECTOR_RAIL:
-			case DOUBLE_PLANT:
-			case POTATO:
-			case CROPS:
-			case DIODE:
-			case DIODE_BLOCK_OFF:
-			case DIODE_BLOCK_ON:
-			case FLOWER_POT:
-			case IRON_DOOR:
-			case IRON_DOOR_BLOCK:
-			case LADDER: // different from pop off list
-			case LEVER:
-			case LONG_GRASS:
-			case MELON_STEM:
-			case NETHER_WARTS:
-			case POWERED_RAIL:
-			case PUMPKIN_STEM:
-			case RAILS:
-			case RED_MUSHROOM:
-			case RED_ROSE:
-			case REDSTONE:
-			case REDSTONE_COMPARATOR_OFF:
-			case REDSTONE_COMPARATOR_ON:
-			case REDSTONE_TORCH_OFF:
-			case REDSTONE_TORCH_ON:
-			case REDSTONE_WIRE:
-			case SAPLING:
-			case SIGN:
-			case SIGN_POST:
-			case SKULL:
-			case SUGAR_CANE_BLOCK:
-			case STONE_PLATE:
-			case TORCH:
-			case TRIPWIRE:
-			case TRIPWIRE_HOOK: // different from pop off list
-			case VINE: // different from pop off list
-			case WATER_LILY:
-			case WHEAT:
-			case WOOD_DOOR:
-			case WOOD_PLATE:
-			case WOODEN_DOOR:
-			case YELLOW_FLOWER:
+            case BlockID.ACTIVATOR_RAIL:
+            case BlockID.BROWN_MUSHROOM:
+            case BlockID.CACTUS:
+            case BlockID.CARROT_BLOCK:
+            case BlockID.COCOA: // different from pop off list
+            case BlockID.DEAD_BUSH:
+            case BlockID.DETECTOR_RAIL:
+            case BlockID.DOUBLE_PLANT:
+            case BlockID.POTATO_BLOCK:
+            case BlockID.FLOWER_POT_BLOCK:
+            case BlockID.IRON_DOOR_BLOCK:
+            case BlockID.LADDER: // different from pop off list
+            case BlockID.LEVER:
+            case BlockID.TALL_GRASS:
+            case BlockID.MELON_STEM:
+            case BlockID.NETHER_WART_BLOCK:
+            case BlockID.POWERED_RAIL:
+            case BlockID.PUMPKIN_STEM:
+            case BlockID.RAIL:
+            case BlockID.RED_MUSHROOM:
+            case BlockID.ROSE:
+            case BlockID.POWERED_COMPARATOR:
+            case BlockID.UNPOWERED_COMPARATOR:
+            case BlockID.REDSTONE_TORCH:
+            case BlockID.UNLIT_REDSTONE_TORCH:
+            case BlockID.REDSTONE_WIRE:
+            case BlockID.SAPLING:
+            case BlockID.WALL_SIGN:
+            case BlockID.SIGN_POST:
+            case BlockID.SKULL_BLOCK:
+            case BlockID.SUGARCANE_BLOCK:
+            case BlockID.STONE_PRESSURE_PLATE:
+            case BlockID.TORCH:
+            case BlockID.TRIPWIRE:
+            case BlockID.TRIPWIRE_HOOK: // different from pop off list
+            case BlockID.VINE: // different from pop off list
+            case BlockID.WATER_LILY:
+            case BlockID.WHEAT_BLOCK:
+            case BlockID.WOOD_DOOR_BLOCK:
+            case BlockID.WOODEN_PRESSURE_PLATE:
+            case BlockID.DANDELION:
 				return true;
 			default:
 				return false;
@@ -680,26 +596,21 @@ public class BlockUtils {
 	 * @param m
 	 * @return
 	 */
-	public static boolean materialRequiresSoil(Material m){
+    public static boolean materialRequiresSoil(int m) {
 		switch(m){
-			case CROPS:
-			case WHEAT:
-			case POTATO:
-			case CARROT:
-			case MELON_STEM:
-			case PUMPKIN_STEM:
+            case BlockID.WHEAT_BLOCK:
+            case BlockID.POTATO_BLOCK:
+            case BlockID.CARROT_BLOCK:
+            case BlockID.MELON_STEM:
+            case BlockID.PUMPKIN_STEM:
 				return true;
 			default:
 				return false;
 		}
 	}
-    
-    
-    /**
-	 * @param currBlock
-	 * @param toBeFelled
-	 */
-    public static ArrayList<Block> findConnectedBlocksOfType( Material type, Block currBlock, ArrayList<Location> foundLocations ) {
+
+
+    public static ArrayList<Block> findConnectedBlocksOfType(int type, Block currBlock, ArrayList<Location> foundLocations) {
     	
     	ArrayList<Block> foundBlocks = new ArrayList<Block>();
     	
@@ -708,20 +619,16 @@ public class BlockUtils {
     	}
         	
     	foundLocations.add(currBlock.getLocation());
-    	
-    	for(int x = -1; x <= 1; x++){
-    		for(int z = -1; z <= 1; z++){
-    			for(int y = -1; y <= 1; y++){
-        			Block newblock = currBlock.getRelative(x, y, z);
-        			// ensure it matches the type and wasn't already found
-        			if( newblock.getType() == type && !foundLocations.contains(newblock.getLocation()) ){
-        				foundBlocks.add(newblock);
-        				ArrayList<Block> additionalBlocks = findConnectedBlocksOfType( type, newblock, foundLocations );
-        				if(additionalBlocks.size() > 0){
-        					foundBlocks.addAll(additionalBlocks);
-        				}
-        			}
-        		}
+
+        for (BlockFace face : BlockFace.values()) {
+            Block newblock = currBlock.getSide(face);
+            // ensure it matches the type and wasn't already found
+            if (newblock.getId() == type && !foundLocations.contains(newblock.getLocation())) {
+                foundBlocks.add(newblock);
+                ArrayList<Block> additionalBlocks = findConnectedBlocksOfType(type, newblock, foundLocations);
+                if (additionalBlocks.size() > 0) {
+                    foundBlocks.addAll(additionalBlocks);
+                }
     		}
     	}
 
@@ -736,11 +643,11 @@ public class BlockUtils {
      * @param loc
      * @return
      */
-    public static Block getFirstBlockOfMaterialBelow( Material m, Location loc ){
+    public static Block getFirstBlockOfMaterialBelow(int m, Location loc) {
     	for(int y = (int) loc.getY(); y > 0; y--){
-    		loc.setY( y );
-    		if(loc.getBlock().getType().equals(m)){
-    			return loc.getBlock();
+            loc.y = y;
+            if (loc.getLevel().getBlock(loc).getId() == m) {
+                return loc.getLevel().getBlock(loc);
     		}
     	}
     	return null;
@@ -752,12 +659,12 @@ public class BlockUtils {
      * @param m
      * @return
      */
-    public static boolean isGrowableStructure(Material m){
+    public static boolean isGrowableStructure(int m) {
 		switch(m){
-			case LEAVES:
-			case LOG:
-			case HUGE_MUSHROOM_1:
-			case HUGE_MUSHROOM_2:
+            case BlockID.LEAVES:
+            case BlockID.LOG:
+            case BlockID.BROWN_MUSHROOM_BLOCK:
+            case BlockID.RED_MUSHROOM_BLOCK:
 				return true;
 			default:
 				return false;

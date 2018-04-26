@@ -1,14 +1,14 @@
 package us.dhmc.elixr;
 
-import java.io.InputStream;
+import cn.nukkit.item.Item;
+import cn.nukkit.utils.Config;
+
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
 
 public class MaterialAliases {
     
@@ -30,21 +30,25 @@ public class MaterialAliases {
 	
 	/**
 	 * Load the yml file and save config to hashmap
-	 * @param plugin
 	 */
 	public MaterialAliases(){
-		
-		FileConfiguration items = null;
-		InputStream defConfigStream = this.getClass().getResourceAsStream("/items.yml");
-	    if (defConfigStream != null){
+
+        Config items = null;
+        File defConfigStream = null;
+        try {
+            defConfigStream = new File(this.getClass().getResource("/items.yml").toURI());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        if (defConfigStream != null) {
 	    	System.out.println("Elixr: Loaded items directory");
-	    	items = YamlConfiguration.loadConfiguration(defConfigStream);
+            items = new Config(defConfigStream);
 	    }
 	    
 	    if( items != null ){
 
 			// Load all item ids/aliases
-			Map<String, Object> itemaliases = items.getConfigurationSection("items").getValues(false);
+            Map<String, Object> itemaliases = items.getSections("items").getAllMap();
 			
 			// Cache the values for easier lookup
 			if(itemaliases != null){
@@ -86,8 +90,8 @@ public class MaterialAliases {
 			item_name = itemAliases.get(key);
 		}
 		if(item_name == null){
-			ItemStack i = new ItemStack( typeid,subid);
-			item_name = i.getType().name().toLowerCase().replace("_", " ");
+            Item i = new Item(typeid, subid);
+            item_name = i.getName().toLowerCase().replace("_", " ");
 		}
 		return item_name;
 	}
@@ -98,8 +102,8 @@ public class MaterialAliases {
 	 * @param i
 	 * @return
 	 */
-	public String getAlias( ItemStack i ){
-		return getAlias( i.getTypeId(), (byte) i.getDurability() );
+    public String getAlias(Item i) {
+        return getAlias(i.getId(), (byte) i.getDamage());
 	}
 	
 	

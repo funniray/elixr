@@ -1,54 +1,54 @@
 package us.dhmc.elixr;
 
+import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemID;
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.potion.Potion;
+import cn.nukkit.utils.TextFormat;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.potion.Potion;
 
 /**
  * @author https://gist.github.com/PaulBGD/9831d28b1c7bdba0cddd
  */
 public class ItemBuilder {
 
-    private Material mat;
+    private int ID;
     private int amount;
     private final short data;
 
     private String title = null;
     private final List<String> lore = new ArrayList<String>();
     private final HashMap<Enchantment, Integer> enchants = new HashMap<Enchantment, Integer>();
-    private Color color;
+    private TextFormat color;
     private Potion potion;
 
-    public ItemBuilder(Material mat) {
-       this(mat, 1);
+    public ItemBuilder(int ID) {
+        this(ID, 1);
     }
 
-    public ItemBuilder(Material mat, int amount) {
-       this(mat, amount, (short) 0);
+    public ItemBuilder(int ID, int amount) {
+        this(ID, amount, (short) 0);
     }
 
-    public ItemBuilder(Material mat, short data) {
-       this(mat, 1, data);
+    public ItemBuilder(int ID, short data) {
+        this(ID, 1, data);
     }
 
-    public ItemBuilder(Material mat, int amount, short data) {
-       this.mat = mat;
+    public ItemBuilder(int ID, int amount, short data) {
+        this.ID = ID;
        this.amount = amount;
        this.data = data;
     }
 
-    public ItemBuilder setType(Material mat) {
-       this.mat = mat;
+    public ItemBuilder setColor(TextFormat color) {
+        if (!new Item(ID).getName().contains("LEATHER_")) {
+            throw new IllegalArgumentException("Can only dye leather armor!");
+        }
+        this.color = color;
        return this;
     }
 
@@ -75,20 +75,24 @@ public class ItemBuilder {
        return this;
     }
 
-    public ItemBuilder setColor(Color color) {
-       if (!this.mat.name().contains("LEATHER_")) {
-          throw new IllegalArgumentException("Can only dye leather armor!");
-       }
-       this.color = color;
-       return this;
-    }
-
     public ItemBuilder setPotion(Potion potion) {
-       if (this.mat != Material.POTION) {
-          this.mat = Material.POTION;
+        if (ID != ItemID.POTION) {
+            this.ID = ItemID.POTION;
        }
        this.potion = potion;
        return this;
+    }
+
+    public Item build() {
+        Item item = new Item(this.ID, this.amount, this.data);
+        item.setCustomName(this.title);
+        //TODO:
+       /*item.setLore(this.lore);
+       item.addEnchantment(this.enchants);
+       if (this.potion != null && item instanceof ItemPotion) {
+           ((ItemPotion) item).setPotion(this.potion);
+       }*/
+        return item;
     }
 
     public ItemBuilder setAmount(int amount) {
@@ -96,33 +100,8 @@ public class ItemBuilder {
        return this;
     }
 
-    public ItemStack build() {
-       Material mat = this.mat;
-       if (mat == null) {
-          mat = Material.AIR;
-          Bukkit.getLogger().warning("Null material!");
-       }
-       ItemStack item = new ItemStack(this.mat, this.amount, this.data);
-       ItemMeta meta = item.getItemMeta();
-       if (this.title != null) {
-          meta.setDisplayName(this.title);
-       }
-       if (!this.lore.isEmpty()) {
-          meta.setLore(this.lore);
-       }
-       if (meta instanceof LeatherArmorMeta) {
-          ((LeatherArmorMeta) meta).setColor(this.color);
-       }
-       item.setItemMeta(meta);
-       item.addUnsafeEnchantments(this.enchants);
-       if (this.potion != null) {
-          this.potion.apply(item);
-       }
-       return item;
-    }
-
     public ItemBuilder clone() {
-       ItemBuilder newBuilder = new ItemBuilder(this.mat);
+        ItemBuilder newBuilder = new ItemBuilder(this.ID);
 
        newBuilder.setTitle(this.title);
        for (String lore : this.lore) {
@@ -137,8 +116,13 @@ public class ItemBuilder {
        return newBuilder;
     }
 
-    public Material getType() {
-       return this.mat;
+    public int getType() {
+        return this.ID;
+    }
+
+    public ItemBuilder setType(int ID) {
+        this.ID = ID;
+        return this;
     }
 
     public String getTitle() {
@@ -147,10 +131,6 @@ public class ItemBuilder {
 
     public List<String> getLore() {
        return this.lore;
-    }
-
-    public Color getColor() {
-       return this.color;
     }
 
     public boolean hasEnchantment(Enchantment enchant) {
@@ -164,33 +144,32 @@ public class ItemBuilder {
     public HashMap<Enchantment, Integer> getAllEnchantments() {
        return this.enchants;
     }
-    
-    public boolean isItem( ItemStack item ) {
+
+    public boolean isItem(Item item) {
         return isItem( item, false );
     }
 
-    public boolean isItem( ItemStack item, boolean strictDataMatch ) {
-       ItemMeta meta = item.getItemMeta();
-       if (item.getType() != this.getType()) {
+    public boolean isItem(Item item, boolean strictDataMatch) {
+        if (item.getId() != this.getType()) {
           return false;
        }
-       if (!meta.hasDisplayName() && this.getTitle() != null) {
+        if (!item.hasCustomName() && this.getTitle() != null) {
           return false;
        }
-       if (!meta.getDisplayName().equals(this.getTitle())) {
+        if (!item.getCustomName().equals(this.getTitle())) {
           return false;
        }
-       if (!meta.hasLore() && !this.getLore().isEmpty()) {
+        if (item.getLore().length == 0 && !this.getLore().isEmpty()) {
           return false;
        }
-       if(meta.hasLore()) {
-          for (String lore : meta.getLore()) {
+        if (item.getLore().length != 0) {
+            for (String lore : item.getLore()) {
              if (!this.getLore().contains(lore)) {
                 return false;
              }
           }
        }
-       for (Enchantment enchant : item.getEnchantments().keySet()) {
+        for (Enchantment enchant : item.getEnchantments()) {
           if (!this.hasEnchantment(enchant)) {
              return false;
           }

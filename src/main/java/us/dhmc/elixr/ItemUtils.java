@@ -1,22 +1,11 @@
 package us.dhmc.elixr;
 
+import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.level.Location;
+
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.bukkit.FireworkEffect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.bukkit.inventory.meta.FireworkEffectMeta;
-import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.potion.PotionEffect;
 
 public class ItemUtils {
     
@@ -25,8 +14,8 @@ public class ItemUtils {
      * @param item
      * @return
      */
-    public static boolean isValidItem( ItemStack item ){
-        return ( item != null && !item.getType().equals( Material.AIR ) );
+    public static boolean isValidItem(Item item) {
+        return (item != null && item.getId() != 0);
     }
     
     /**
@@ -36,13 +25,13 @@ public class ItemUtils {
      * @param checkDura
      * @return
      */
-    public static boolean isSameType( ItemStack a, ItemStack b, boolean checkDura ){
+    public static boolean isSameType(Item a, Item b, boolean checkDura) {
         
         // Initial type check
-        if( !a.getType().equals( b.getType() ) ) return false;
+        if (a.getId() != b.getId()) return false;
         
         // Durability check
-        if( checkDura && a.getDurability() != b.getDurability() ) return false;
+        if (checkDura && a.getDamage() != b.getDamage()) return false;
         
         return true;
         
@@ -54,8 +43,8 @@ public class ItemUtils {
      * @param b
      * @return
      */
-    public static boolean equals( ItemStack a, ItemStack b ){
-        return equals(a,b,dataValueUsedForSubitems( a.getTypeId() ));
+    public static boolean equals(Item a, Item b) {
+        return equals(a, b, dataValueUsedForSubitems(a.getId()));
     }
     
     /**
@@ -65,154 +54,13 @@ public class ItemUtils {
      * @param checkDura
      * @return
      */
-    public static boolean equals( ItemStack a, ItemStack b, boolean checkDura ){
-        
-        ItemMeta metaA = a.getItemMeta();
-        ItemMeta metaB = b.getItemMeta();
+    public static boolean equals(Item a, Item b, boolean checkDura) {
+
         
         // Type/dura
         if( !isSameType(a,b,checkDura) ) return false;
-        
-        // Display name
-        if( metaA.getDisplayName() != null ){
-            if( !metaA.getDisplayName().equals( metaB.getDisplayName() ) ) return false;
-        } else {
-            if( metaB.getDisplayName() != null ) return false;
-        }
-        
-        // Coloring
-        if( metaA instanceof LeatherArmorMeta ){
-            if( !(metaB instanceof LeatherArmorMeta) ) return false;
-            LeatherArmorMeta colorA = (LeatherArmorMeta) metaA;
-            LeatherArmorMeta colorB = (LeatherArmorMeta) metaB;
-            if( !colorA.getColor().equals(colorB.getColor()) ) return false;
-        }
 
-        // Lore
-        if( metaA.getLore() != null && metaA.getLore() != null ){
-            for(String lore : metaA.getLore()){
-                if(!metaB.getLore().contains(lore)) return false;
-            }
-        }
-        else if( !(metaA.getLore() == null && metaB.getLore() == null) ) return false;
-        
-        // Enchants
-        if( !enchantsEqual(a.getEnchantments(),b.getEnchantments()) ) return false;
-        
-        // Books
-        if( metaA instanceof BookMeta ){
-            if( !(metaB instanceof BookMeta) ) return false;
-            
-            BookMeta bookA = (BookMeta) metaA;
-            BookMeta bookB = (BookMeta) metaB;
-            
-            // Author
-            if( bookA.getAuthor() != null ){
-                if( !bookA.getAuthor().equals( bookB.getAuthor() ) ) return false;
-            }
-            
-            if( bookA.getTitle() != null ){
-                if( !bookA.getTitle().equals( bookB.getTitle() ) ) return false;
-            }
-            
-            // Pages
-            if( bookA.getPageCount() != bookB.getPageCount() ) return false;
-            
-            for( int page = 0; page < bookA.getPages().size(); page++ ){
-                String pageContentA = bookA.getPages().get( page );
-                if( pageContentA != null ){
-                    if( !pageContentA.equals( bookB.getPages().get(page) ) ) return false;
-                }
-            }
-        }
-        
-        // Enchanted books
-        if( metaA instanceof EnchantmentStorageMeta ){
-            
-            if( !(metaB instanceof EnchantmentStorageMeta) ) return false;
-            
-            EnchantmentStorageMeta enchA = (EnchantmentStorageMeta) metaA;
-            EnchantmentStorageMeta enchB = (EnchantmentStorageMeta) metaB;
-            
-            if( enchA.hasStoredEnchants() != enchB.hasStoredEnchants() ) return false;
-            
-            if( !enchantsEqual(enchA.getStoredEnchants(),enchB.getStoredEnchants()) ) return false;
-            
-        }
-        
-        // Skulls
-        if( metaA instanceof SkullMeta ){
-            if( !(metaB instanceof SkullMeta) ) return false;
-            
-            SkullMeta skullA = (SkullMeta) metaA;
-            SkullMeta skullB = (SkullMeta) metaB;
-            
-            if( skullA.getOwner() != null ){
-                if( !skullA.getOwner().equals( skullB.getOwner() ) ) return false;
-            } else {
-                if( skullB.getOwner() != null ) return false;
-            }
-        }
-        
-        // Potions
-        if( metaA instanceof PotionMeta ){
-            if( !(metaB instanceof PotionMeta) ) return false;
-            
-            PotionMeta potA = (PotionMeta) metaA;
-            PotionMeta potB = (PotionMeta) metaB;
-            
-            for( int c = 0; c < potA.getCustomEffects().size(); c++ ){
-                PotionEffect e = potA.getCustomEffects().get(c);
-                if( !e.equals( potB.getCustomEffects().get(c) ) ) return true;
-            }
-        }
-        
-        // Fireworks
-        if( metaA instanceof FireworkMeta ){
-            if( !(metaB instanceof FireworkMeta) ) return false;
-            
-            FireworkMeta fwA = (FireworkMeta) metaA;
-            FireworkMeta fwB = (FireworkMeta) metaB;
-            
-            if( fwA.getPower() != fwB.getPower() ) return false;
-            
-            for( int e = 0; e < fwA.getEffects().size(); e++ ){
-                if( !fwA.getEffects().get(e).equals( fwB.getEffects().get(e) ) ) return false;
-            }
-        }
-        
-        // Firework Effects
-        if( metaA instanceof FireworkEffectMeta ){
-            if( !(metaB instanceof FireworkEffectMeta) ) return false;
-            
-            FireworkEffectMeta fwA = (FireworkEffectMeta) metaA;
-            FireworkEffectMeta fwB = (FireworkEffectMeta) metaB;
-
-            FireworkEffect effectA = fwA.getEffect();
-            FireworkEffect effectB = fwB.getEffect();
-            
-            if( !effectA.getType().equals( effectB.getType() ) ) return false;
-            
-            if( effectA.getColors().size() != effectB.getColors().size() ) return false;
-            
-            // Colors
-            for( int c = 0; c < effectA.getColors().size(); c++ ){
-                if( !effectA.getColors().get(c).equals( effectB.getColors().get(c) ) ) return false;
-            }
-            
-            if( effectA.getFadeColors().size() != effectB.getFadeColors().size() ) return false;
-            
-            // Fade colors
-            for( int c = 0; c < effectA.getFadeColors().size(); c++ ){
-                if( !effectA.getFadeColors().get(c).equals( effectB.getFadeColors().get(c) ) ) return false;
-            }
-            
-            if( effectA.hasFlicker() != effectB.hasFlicker() ) return false;
-            if( effectA.hasTrail() != effectB.hasTrail() ) return false;
-            
-        }
-        
-        return true;
+        return a.getCompoundTag() == b.getCompoundTag();
         
     }
     
@@ -222,7 +70,7 @@ public class ItemUtils {
      * @param b
      * @return
      */
-    protected static boolean enchantsEqual( Map<Enchantment,Integer> a, Map<Enchantment,Integer> b ){
+    protected static boolean enchantsEqual(Map<Enchantment, Integer> a, Map<Enchantment, Integer> b) {
         
         // Enchants
         if( a.size() != b.size() ) return false;
@@ -247,10 +95,10 @@ public class ItemUtils {
 	 * @todo this is buggy, wth?
 	 * @return
 	 */
-	public static String getUsedDurabilityPercentage( ItemStack item ){
+    public static String getUsedDurabilityPercentage(Item item) {
 
-		short dura = item.getDurability();
-		short max_dura = item.getType().getMaxDurability();
+        int dura = item.getDamage();
+        int max_dura = item.getMaxDurability();
 		if(dura > 0 && max_dura > 0 && dura != max_dura){
 			double diff = ((dura / max_dura)*100);
 			if(diff > 0){
@@ -266,10 +114,10 @@ public class ItemUtils {
 	 * Returns the durability remaining
 	 * @return
 	 */
-	public static String getDurabilityPercentage( ItemStack item ){
+    public static String getDurabilityPercentage(Item item) {
 
-		short dura = item.getDurability();
-		short max_dura = item.getType().getMaxDurability();
+        int dura = item.getDamage();
+        int max_dura = item.getMaxDurability();
 		if(dura > 0 && max_dura > 0 && dura != max_dura){
 			double diff = max_dura - dura;
 			diff = ((diff / max_dura)*100);
@@ -287,10 +135,10 @@ public class ItemUtils {
 	 * Returns a proper full name for an item, which includes meta content as well.
 	 * @return string
 	 */
-	public static String getItemFullNiceName( ItemStack item ){
-		
-		String item_name = "";
-		
+    public static String getItemFullNiceName(Item item) {
+
+        //String item_name = "";
+		/*TODO:
 		// Leather Coloring
 		if(item.getType().name().contains("LEATHER_")){
 			LeatherArmorMeta lam = (LeatherArmorMeta) item.getItemMeta();
@@ -399,9 +247,9 @@ public class ItemUtils {
 			if(displayName != null){
 				item_name += ", named \"" + displayName + "\"";
 			}
-		}
-		
-		return item_name;
+		}*/
+
+        return item.getName();
 		
 	}
 	
@@ -454,14 +302,13 @@ public class ItemUtils {
      * and more taken into account.
      * @param item
      */
-    public static boolean canSafelyStack( ItemStack item ){
+    public static boolean canSafelyStack(Item item) {
     	// Can't stack
     	if( item.getMaxStackSize() == 1 ){
     		return false;
     	}
     	// Has meta
-    	ItemMeta im = item.getItemMeta();
-    	if( im.hasDisplayName() || im.hasEnchants() || im.hasLore() ){
+        if (item.hasCustomName() || item.hasEnchantments() || item.getLore().length > 0) {
     		return false;
     	}
     	return true;
@@ -474,8 +321,8 @@ public class ItemUtils {
      * @param location The location to drop the item at
      * @param itemStack The item to drop
      */
-    public static void dropItem(Location location, ItemStack itemStack) {
-        location.getWorld().dropItemNaturally(location, itemStack);
+    public static void dropItem(Location location, Item itemStack) {
+        location.getLevel().dropItem(location, itemStack);
     }
     
     
@@ -486,7 +333,7 @@ public class ItemUtils {
 	 * @param is The items to drop
 	 * @param quantity The amount of items to drop
 	 */
-    public static void dropItem( Location location, ItemStack is, int quantity ) {
+    public static void dropItem(Location location, Item is, int quantity) {
         for (int i = 0; i < quantity; i++) {
             dropItem(location, is);
         }

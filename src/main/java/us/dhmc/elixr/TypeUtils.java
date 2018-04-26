@@ -1,5 +1,7 @@
 package us.dhmc.elixr;
 
+import cn.nukkit.utils.TextFormat;
+
 import java.text.DecimalFormat;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -8,7 +10,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bukkit.ChatColor;
 
 public class TypeUtils {
 	
@@ -37,15 +38,7 @@ public class TypeUtils {
 	public static float formatDouble( double val ){
     	return Float.parseFloat(new DecimalFormat("#.##").format(val));
     }
-	
-	
-	/**
-	 * Replaces string template placeholders with values in a Hashtable.
-	 * Text should be formatted with %(key) type placeholders.
-	 * @param key
-	 * @param replacer
-	 * @return
-	 */
+
 	public static String getStringFromTemplate( String msg, Hashtable<String,String> replacer ){
 		if( msg != null && !replacer.isEmpty() ){
 			for (Entry<String,String> entry : replacer.entrySet()){
@@ -62,7 +55,7 @@ public class TypeUtils {
 	 * @return
 	 */
 	public static String colorize(String text){
-        return ChatColor.translateAlternateColorCodes('&', text);
+		return TextFormat.colorize('&', text);
     }
 	
 	
@@ -73,7 +66,7 @@ public class TypeUtils {
 	 * @return
 	 */
 	public static String stripTextFormatCodes( String text ){
-		return ChatColor.stripColor( text.replaceAll("(&+([a-z0-9A-Z])+)", "") );
+		return TextFormat.clean(text.replaceAll("(&+([a-z0-9A-Z])+)", ""));
 	}
 	
 	

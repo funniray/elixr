@@ -1,14 +1,14 @@
 package us.dhmc.elixr;
 
+import cn.nukkit.plugin.Plugin;
+import cn.nukkit.utils.Config;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public class ConfigBase {
 	
@@ -20,7 +20,7 @@ public class ConfigBase {
 	/**
 	 * 
 	 */
-	protected FileConfiguration config;
+	protected Config config;
 	
 	/**
 	 * 
@@ -29,12 +29,8 @@ public class ConfigBase {
 	public ConfigBase( Plugin plugin ) {
 		this.plugin = plugin;
 	}
-	
-	/**
-	 * 
-	 * @param plugin
-	 */
-	public FileConfiguration getConfig(){
+
+	public Config getConfig() {
 		config = plugin.getConfig();
 		return config;
 	}
@@ -56,22 +52,21 @@ public class ConfigBase {
 		File file = new File(getDirectory(), filename + ".yml");
 		return file;
 	}
-	
-	/**
-	 * 
-	 * @param player
-	 * @return
-	 */
-	protected FileConfiguration loadConfig( String default_folder, String filename ){
+
+	protected Config loadConfig(String default_folder, String filename) {
 		File file = getFilename( filename );
 		if(file.exists()){
-			return YamlConfiguration.loadConfiguration(file);
+			return new Config(file);
 		} else {
 			// Look for defaults in the jar
-		    InputStream defConfigStream = plugin.getResource(default_folder+filename+".yml");
+			URL defConfigStream = plugin.getClass().getResource(default_folder + filename + ".yml");
 		    if (defConfigStream != null){
-		        return YamlConfiguration.loadConfiguration(defConfigStream);
-		    }
+				try {
+					return new Config(new File(defConfigStream.toURI()));
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
 		    return null;
 		}
 	}
@@ -80,19 +75,15 @@ public class ConfigBase {
 	 * 
 	 * @param config
 	 */
-	protected void saveConfig( String filename, FileConfiguration config ){
+	protected void saveConfig(String filename, Config config) {
 		File file = getFilename( filename );
-		try {
-			config.save(file);
-		} catch (IOException e){
-			e.printStackTrace();
-		}
+		config.save(file);
 	}
 	
 	/**
 	 * 
 	 */
-	protected void write( String filename, FileConfiguration config ){
+	protected void write(String filename, Config config) {
 		try {
 			BufferedWriter bw = new BufferedWriter( new FileWriter( getFilename( filename ), true ) );
 			saveConfig( filename, config );

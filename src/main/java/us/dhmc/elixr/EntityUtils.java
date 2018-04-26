@@ -1,13 +1,10 @@
 package us.dhmc.elixr;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
 
-import java.util.List;
+import cn.nukkit.Player;
+import cn.nukkit.block.BlockID;
+import cn.nukkit.item.ItemID;
+import cn.nukkit.level.Location;
 
 public class EntityUtils {
 	
@@ -18,15 +15,16 @@ public class EntityUtils {
 	 * @param radius
 	 * @return
 	 */
-	public static int removeNearbyItemDrops( Player player, int radius ){
+    public static int removeNearbyItemDrops(Player player, int radius) {
 		int removed = 0;
+		/*TODO
 		List<Entity> nearby = player.getNearbyEntities(radius, radius, radius);
 		for(Entity e : nearby){
-			if(e instanceof Item || e instanceof ExperienceOrb){
-                e.remove();
+			if(e instanceof EntityItem || e instanceof EntityXPOrb){
+                e.kill();
                 removed++;
             }
-		}
+		}*/
 		return removed;
 	}
 
@@ -41,12 +39,12 @@ public class EntityUtils {
 	public static boolean inCube(Location loc1, int radius, Location loc2) {
 		if(loc1 == null || loc2 == null) return false;
 		return (
-				loc1.getBlockX() + radius > loc2.getBlockX()
-				&& loc1.getBlockX() - radius < loc2.getBlockX()
-				&& loc1.getBlockY() + radius > loc2.getBlockY()
-				&& loc1.getBlockY() - radius < loc2.getBlockY()
-				&& loc1.getBlockZ() + radius > loc2.getBlockZ()
-				&& loc1.getBlockZ() - radius < loc2.getBlockZ()
+                loc1.x + radius > loc2.x
+                        && loc1.x - radius < loc2.x
+                        && loc1.y + radius > loc2.y
+                        && loc1.y - radius < loc2.y
+                        && loc1.z + radius > loc2.z
+                        && loc1.z - radius < loc2.z
 				);
 	}
 	
@@ -58,47 +56,45 @@ public class EntityUtils {
 	 * @return
 	 * @todo doesn't bukkit have this already?
 	 */
-	public static boolean playerMayPassThrough( Material m ){
+    public static boolean playerMayPassThrough(int m) {
 		switch(m){
-			case AIR:
-			case CARROT:
-			case DEAD_BUSH:
-			case DETECTOR_RAIL:
-			case POTATO:
-			case CROPS:
-			case DIODE:
-			case DIODE_BLOCK_OFF:
-			case DIODE_BLOCK_ON:
-			case FLOWER_POT:
-			case LEVER:
-			case LONG_GRASS:
-			case MELON_STEM:
-			case NETHER_WARTS:
-			case POWERED_RAIL:
-			case PUMPKIN_STEM:
-			case RAILS:
-			case RED_MUSHROOM:
-			case RED_ROSE:
-			case REDSTONE:
-			case REDSTONE_TORCH_OFF:
-			case REDSTONE_TORCH_ON:
-			case REDSTONE_WIRE:
-			case SAPLING:
-			case SIGN:
-			case SIGN_POST:
-			case SKULL:
-			case SNOW:
-			case SUGAR_CANE_BLOCK:
-            case STANDING_BANNER:
-			case STONE_PLATE:
-			case TORCH:
-			case TRIPWIRE:
-            case WALL_BANNER:
-			case WATER_LILY:
-			case WHEAT:
-			case WOOD_PLATE:
-			case WOODEN_DOOR:
-			case YELLOW_FLOWER:
+            case 0:
+            case ItemID.CARROT:
+            case BlockID.DEAD_BUSH:
+            case BlockID.DETECTOR_RAIL:
+            case ItemID.POTATO:
+            case BlockID.POWERED_COMPARATOR:
+            case BlockID.UNPOWERED_COMPARATOR:
+            case BlockID.POWERED_REPEATER:
+            case BlockID.UNPOWERED_REPEATER:
+            case ItemID.FLOWER_POT:
+            case BlockID.LEVER:
+            case BlockID.TALL_GRASS:
+            case BlockID.MELON_STEM:
+            case BlockID.NETHER_WART_BLOCK:
+            case BlockID.POWERED_RAIL:
+            case BlockID.PUMPKIN_STEM:
+            case BlockID.RAIL:
+            case BlockID.RED_MUSHROOM:
+            case BlockID.ROSE:
+            case ItemID.REDSTONE:
+            case BlockID.REDSTONE_TORCH:
+            case BlockID.UNLIT_REDSTONE_TORCH:
+            case BlockID.REDSTONE_WIRE:
+            case BlockID.SAPLING:
+            case BlockID.SIGN_POST:
+            case BlockID.WALL_SIGN:
+            case BlockID.SKULL_BLOCK:
+            case BlockID.SNOW:
+            case BlockID.SUGARCANE_BLOCK:
+            case BlockID.STONE_PRESSURE_PLATE:
+            case BlockID.TORCH:
+            case BlockID.TRIPWIRE:
+            case BlockID.WATER_LILY:
+            case BlockID.WHEAT_BLOCK:
+            case BlockID.WOODEN_PRESSURE_PLATE:
+            case BlockID.WOOD_DOOR_BLOCK:
+            case BlockID.DANDELION:
 				return true;
 			default:
 				return false;

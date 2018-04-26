@@ -1,7 +1,7 @@
 package us.dhmc.elixr;
 
-import org.bukkit.Location;
-import org.bukkit.World.Environment;
+
+import cn.nukkit.level.Location;
 
 public class WorldUtils {
     
@@ -10,9 +10,7 @@ public class WorldUtils {
      * @param loc the location to strike lightning above
      */
     public static void thunder( Location loc ){
-        loc.setY(350D);
-        if(loc.getWorld().getEnvironment() == Environment.NORMAL){
-            loc.getWorld().strikeLightningEffect(loc);
-        }
+        loc.y = 350D;
+        //TODO: loc.getLevel().strikeLightningEffect(loc);
     }
 }

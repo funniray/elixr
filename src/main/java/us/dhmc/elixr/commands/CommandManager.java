@@ -1,23 +1,11 @@
 package us.dhmc.elixr.commands;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandMap;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
-import us.dhmc.elixr.ReflectionUtil;
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.command.CommandMap;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.ConsoleCommandSender;
+import cn.nukkit.plugin.Plugin;
 import us.dhmc.elixr.TypeUtils;
 import us.dhmc.elixr.commands.arguments.Argument;
 import us.dhmc.elixr.commands.arguments.ArgumentValidator;
@@ -25,6 +13,12 @@ import us.dhmc.elixr.commands.arguments.Flag;
 import us.dhmc.elixr.commands.exceptions.CommandArgumentException;
 import us.dhmc.elixr.commands.exceptions.CommandPermissionException;
 import us.dhmc.elixr.commands.exceptions.IllegalCommandSenderException;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class CommandManager {
     
@@ -65,7 +59,7 @@ public class CommandManager {
      * @param permission
      * @return
      */
-    public boolean hasPermission( CommandSender sender, String permission ){
+    public boolean hasPermission(CommandSender sender, String permission) {
         return sender instanceof ConsoleCommandSender || sender.hasPermission(permission);
     }
     
@@ -82,7 +76,7 @@ public class CommandManager {
      * @throws CommandArgumentException 
      * @throws Exception
      */
-    public void execute( CommandSender sender, org.bukkit.command.Command cmd, String[] args ) throws IllegalCommandSenderException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, CommandPermissionException, CommandArgumentException{
+    public void execute(CommandSender sender, cn.nukkit.command.Command cmd, String[] args) throws IllegalCommandSenderException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, CommandPermissionException, CommandArgumentException {
         
         if( !(cmd instanceof DynamicPluginCommand) ){
             throw new IllegalArgumentException("Command is not of type DynamicPluginCommand");
@@ -255,7 +249,7 @@ public class CommandManager {
         List<String> usage = new ArrayList<String>();
         
         String commandName = "";
-        if( command.getAliases().size() > 1 ){
+        if (command.getAliases().length > 1) {
             commandName = "("+TypeUtils.join( command.getAliases(), "|" )+")";
         } else {
             commandName = command.getName();
@@ -285,16 +279,7 @@ public class CommandManager {
         
         return usage;
     }
-    
-    /**
-     * Register the methods of a class.
-     *
-     * @param cls
-     * @param parent
-     * @param obj
-     * @return
-     * @throws Exception 
-     */
+
     private List<DynamicPluginCommand> registerDynamicCommand(Class<?> cls) throws Exception {
         
         List<DynamicPluginCommand> commands = new ArrayList<DynamicPluginCommand>();
@@ -349,11 +334,7 @@ public class CommandManager {
      * @return
      * @throws Exception
      */
-    private CommandMap getCommandMap() throws Exception{
-        CommandMap commandMap = ReflectionUtil.getField(Bukkit.getServer().getPluginManager(), "commandMap");
-        if (commandMap == null){
-            throw new Exception("Invalid command map.");
-        }
-        return commandMap;
+    private CommandMap getCommandMap() {
+        return Server.getInstance().getCommandMap();
     }
 }

@@ -1,6 +1,7 @@
 package us.dhmc.elixr;
 
-import org.bukkit.ChatColor;
+
+import cn.nukkit.utils.TextFormat;
 
 public class Messenger {
 
@@ -21,7 +22,7 @@ public class Messenger {
 	 */
 	public String playerHeaderMsg(String msg){
 		if(msg != null){
-			return ChatColor.GOLD + "["+plugin_name+"] " + ChatColor.WHITE + msg;
+            return TextFormat.GOLD + "[" + plugin_name + "] " + TextFormat.WHITE + msg;
 		}
 		return "";
 	}
@@ -33,7 +34,7 @@ public class Messenger {
      */
     public String playerSuccess(String msg){
         if(msg != null){
-            return ChatColor.GOLD + "["+plugin_name+"] " + ChatColor.GREEN + msg;
+            return TextFormat.GOLD + "[" + plugin_name + "] " + TextFormat.GREEN + msg;
         }
         return "";
     }
@@ -45,7 +46,7 @@ public class Messenger {
 	 */
 	public String playerSubduedHeaderMsg(String msg){
 		if(msg != null){
-			return ChatColor.GOLD + "["+plugin_name+"] " + ChatColor.GRAY + msg;
+            return TextFormat.GOLD + "[" + plugin_name + "] " + TextFormat.GRAY + msg;
 		}
 		return "";
 	}
@@ -57,7 +58,7 @@ public class Messenger {
 	 */
 	public String playerMsg(String msg){
 		if(msg != null){
-			return ChatColor.WHITE + msg;
+            return TextFormat.WHITE + msg;
 		}
 		return "";
 	}
@@ -69,7 +70,7 @@ public class Messenger {
 	 */
 	public String playerSubduedMsg(String msg){
 		if(msg != null){
-			return ChatColor.GRAY + msg;
+            return TextFormat.GRAY + msg;
 		}
 		return "";
 	}
@@ -87,15 +88,9 @@ public class Messenger {
 		}
 		return msg;
 	}
-	
-	/**
-     * 
-     * @param player_name
-     * @param cmd
-     * @param help
-     */
+
     public String playerHelp( String cmd, String help ){
-        return ChatColor.GRAY + "/" + cmd + ChatColor.WHITE + " - " + help;
+        return TextFormat.GRAY + "/" + cmd + TextFormat.WHITE + " - " + help;
     }
 	
 	/**
@@ -105,7 +100,7 @@ public class Messenger {
 	 */
 	public String playerError(String msg){
 		if(msg != null){
-			return ChatColor.GOLD + "["+plugin_name+"] " + ChatColor.RED + msg;
+            return TextFormat.GOLD + "[" + plugin_name + "] " + TextFormat.RED + msg;
 		}
 		return "";
 	}

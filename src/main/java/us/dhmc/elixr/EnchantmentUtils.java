@@ -1,9 +1,8 @@
 package us.dhmc.elixr;
 
-import java.util.Map;
+import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.Enchantment;
 
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
 
 public class EnchantmentUtils {
 	
@@ -12,15 +11,15 @@ public class EnchantmentUtils {
 	 * Given an enchantment, does the current item have any that conflict
 	 * @return
 	 */
-	public static boolean hasConflictingEnchanment( ItemStack item, Enchantment ench ){
-		Map<Enchantment, Integer> enchantments = item.getEnchantments();
+	public static boolean hasConflictingEnchanment(Item item, Enchantment ench) {
+		Enchantment[] enchantments = item.getEnchantments();
 		boolean conflict = false;
-		for(Enchantment e : enchantments.keySet()){
-			if(ench.conflictsWith(e)){
+		for (Enchantment e : enchantments) {
+			if (ench.isCompatibleWith(e) || ench == e) {
 				conflict = true;
 			}
 		}
-		return (enchantments.containsKey(ench) || conflict);
+		return conflict;
 	}
 	
 	
@@ -30,76 +29,74 @@ public class EnchantmentUtils {
 	 * @return
 	 */
 	public static Enchantment getEnchantmentFromCommonName( String name ){
+		int id = 1000;
 		if(name.equalsIgnoreCase("aquaaffinity")){
-			return Enchantment.WATER_WORKER;
+			id = Enchantment.ID_WATER_WORKER;
 		}
 		else if(name.equalsIgnoreCase("bane")){
-			return Enchantment.DAMAGE_ARTHROPODS;
+			id = Enchantment.ID_DAMAGE_ARTHROPODS;
 		}
 		else if(name.equalsIgnoreCase("efficiency")){
-			return Enchantment.DIG_SPEED;
+			id = Enchantment.ID_EFFICIENCY;
 		}
 		else if(name.equalsIgnoreCase("explosion")){
-			return Enchantment.PROTECTION_EXPLOSIONS;
+			id = Enchantment.ID_PROTECTION_EXPLOSION;
 		}
 		else if(name.equalsIgnoreCase("fall")){
-			return Enchantment.PROTECTION_FALL;
+			id = Enchantment.ID_PROTECTION_FALL;
 		}
 		else if(name.equalsIgnoreCase("fire")){
-			return Enchantment.PROTECTION_FIRE;
+			id = Enchantment.ID_PROTECTION_FIRE;
 		}
 		else if(name.equalsIgnoreCase("fireaspect")){
-			return Enchantment.FIRE_ASPECT;
+			id = Enchantment.ID_FIRE_ASPECT;
 		}
 		else if(name.equalsIgnoreCase("flame")){
-			return Enchantment.ARROW_FIRE;
+			id = Enchantment.ID_BOW_FLAME;
 		}
 		else if(name.equalsIgnoreCase("fortune")){
-			return Enchantment.LOOT_BONUS_BLOCKS;
+			id = Enchantment.ID_FORTUNE_DIGGING;
 		}
 		else if(name.equalsIgnoreCase("infinity")){
-			return Enchantment.ARROW_INFINITE;
+			id = Enchantment.ID_BOW_INFINITY;
 		}
 		else if(name.equalsIgnoreCase("knockback")){
-			return Enchantment.KNOCKBACK;
+			id = Enchantment.ID_KNOCKBACK;
 		}
 		else if(name.equalsIgnoreCase("looting")){
-			return Enchantment.LOOT_BONUS_MOBS;
+			id = Enchantment.ID_LOOTING;
 		}
 		else if(name.equalsIgnoreCase("lure")){
-			return Enchantment.LURE;
-		}
-		else if(name.equalsIgnoreCase("luck")){
-			return Enchantment.LUCK;
+			id = Enchantment.ID_LURE;
 		}
 		else if(name.equalsIgnoreCase("power")){
-			return Enchantment.ARROW_DAMAGE;
+			id = Enchantment.ID_BOW_POWER;
 		}
 		else if(name.equalsIgnoreCase("projectile")){
-			return Enchantment.PROTECTION_PROJECTILE;
+			id = Enchantment.ID_PROTECTION_PROJECTILE;
 		}
 		else if(name.equalsIgnoreCase("protection")){
-			return Enchantment.PROTECTION_ENVIRONMENTAL;
+			id = Enchantment.ID_PROTECTION_ALL;
 		}
 		else if(name.equalsIgnoreCase("punch")){
-			return Enchantment.ARROW_KNOCKBACK;
+			id = Enchantment.ID_BOW_KNOCKBACK;
 		}
 		else if(name.equalsIgnoreCase("respiration")){
-			return Enchantment.OXYGEN;
+			id = Enchantment.ID_WATER_BREATHING;
 		}
 		else if(name.equalsIgnoreCase("sharpness")){
-			return Enchantment.DAMAGE_ALL;
+			id = Enchantment.ID_DAMAGE_ALL;
 		}
 		else if(name.equalsIgnoreCase("silktouch")){
-			return Enchantment.SILK_TOUCH;
+			id = Enchantment.ID_SILK_TOUCH;
 		}
 		else if(name.equalsIgnoreCase("smite")){
-			return Enchantment.DAMAGE_UNDEAD;
+			id = Enchantment.ID_DAMAGE_SMITE;
 		}
 		else if(name.equalsIgnoreCase("unbreaking")){
-			return Enchantment.DURABILITY;
+			id = Enchantment.ID_DURABILITY;
 		}
-		return null;
+		return Enchantment.get(id);
 	}
 
 
@@ -112,59 +109,44 @@ public class EnchantmentUtils {
 	public static String getClientSideEnchantmentName( Enchantment ench, int level ){
 		
 		String ench_name = "";
-		
-		if(ench.equals(Enchantment.ARROW_DAMAGE)){
+
+		int id = ench.getId();
+
+		if (id == Enchantment.ID_BOW_POWER) {
 			ench_name = "power";
-		}
-		else if(ench.equals(Enchantment.ARROW_FIRE)){
+		} else if (id == Enchantment.ID_BOW_FLAME) {
 			ench_name = "flame";
-		}
-		else if(ench.equals(Enchantment.ARROW_INFINITE)){
+		} else if (id == Enchantment.ID_BOW_INFINITY) {
 			ench_name = "infinity";
-		}
-		else if(ench.equals(Enchantment.ARROW_KNOCKBACK)){
+		} else if (id == Enchantment.ID_BOW_KNOCKBACK) {
 			ench_name = "punch";
-		}
-		else if(ench.equals(Enchantment.DAMAGE_ALL)){
+		} else if (id == Enchantment.ID_DAMAGE_ALL) {
 			ench_name = "sharpness";
-		}
-		else if(ench.equals(Enchantment.DAMAGE_ARTHROPODS)){
+		} else if (id == Enchantment.ID_DAMAGE_ARTHROPODS) {
 			ench_name = "bane of anthropods";
-		}
-		else if(ench.equals(Enchantment.DAMAGE_UNDEAD)){
+		} else if (id == Enchantment.ID_DAMAGE_SMITE) {
 			ench_name = "damage undead";
-		}
-		else if(ench.equals(Enchantment.DIG_SPEED)){
+		} else if (id == Enchantment.ID_EFFICIENCY) {
 			ench_name = "efficiency";
-		}
-		else if(ench.equals(Enchantment.DURABILITY)){
+		} else if (id == Enchantment.ID_DURABILITY) {
 			ench_name = "unbreaking";
-		}
-		else if(ench.equals(Enchantment.LOOT_BONUS_BLOCKS)){
+		} else if (id == Enchantment.ID_FORTUNE_DIGGING) {
 			ench_name = "fortune";
-		}
-		else if(ench.equals(Enchantment.LOOT_BONUS_MOBS)){
+		} else if (id == Enchantment.ID_LOOTING) {
 			ench_name = "looting";
-		}
-		else if(ench.equals(Enchantment.OXYGEN)){
+		} else if (id == Enchantment.ID_WATER_BREATHING) {
 			ench_name = "respiration";
-		}
-		else if(ench.equals(Enchantment.PROTECTION_ENVIRONMENTAL)){
+		} else if (id == Enchantment.ID_PROTECTION_ALL) {
 			ench_name = "protection";
-		}
-		else if(ench.equals(Enchantment.PROTECTION_EXPLOSIONS)){
+		} else if (id == Enchantment.ID_PROTECTION_EXPLOSION) {
 			ench_name = "blast protection";
-		}
-		else if(ench.equals(Enchantment.PROTECTION_FALL)){
+		} else if (id == Enchantment.ID_PROTECTION_FALL) {
 			ench_name = "feather falling";
-		}
-		else if(ench.equals(Enchantment.PROTECTION_FIRE)){
+		} else if (id == Enchantment.ID_PROTECTION_FIRE) {
 			ench_name = "fire protection";
-		}
-		else if(ench.equals(Enchantment.PROTECTION_PROJECTILE)){
+		} else if (id == Enchantment.ID_PROTECTION_PROJECTILE) {
 			ench_name = "projectile protection";
-		}
-		else if(ench.equals(Enchantment.WATER_WORKER)){
+		} else if (id == Enchantment.ID_WATER_WORKER) {
 			ench_name = "aqua affinity";
 		}
 		else {

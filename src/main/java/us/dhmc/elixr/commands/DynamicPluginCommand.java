@@ -18,10 +18,9 @@ package us.dhmc.elixr.commands;
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginIdentifiableCommand;
-import org.bukkit.plugin.Plugin;
-
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.PluginIdentifiableCommand;
+import cn.nukkit.plugin.Plugin;
 import us.dhmc.elixr.TypeUtils;
 import us.dhmc.elixr.commands.arguments.Argument;
 import us.dhmc.elixr.commands.arguments.Flag;
@@ -36,7 +35,7 @@ import java.util.Map;
 * @author zml2008
 * modified by viveleroi
 */
-public class DynamicPluginCommand extends org.bukkit.command.Command implements PluginIdentifiableCommand {
+public class DynamicPluginCommand extends cn.nukkit.command.Command implements PluginIdentifiableCommand {
 
     protected final Command commandInfo;
     protected final CommandManager registeredWith;
@@ -56,7 +55,7 @@ public class DynamicPluginCommand extends org.bukkit.command.Command implements 
      * @param plugin
      */
     public DynamicPluginCommand( Command commandInfo, CommandManager registeredWith, Method method, Plugin plugin ){
-         super(commandInfo.aliases()[0], commandInfo.desc(), commandInfo.desc(), Arrays.asList(commandInfo.aliases()));
+        super(commandInfo.aliases()[0], commandInfo.desc(), commandInfo.desc(), commandInfo.aliases());
          this.commandInfo = commandInfo;
          this.owningPlugin = plugin;
          this.registeredWith = registeredWith;
@@ -149,11 +148,7 @@ public class DynamicPluginCommand extends org.bukkit.command.Command implements 
     public Argument[] getArguments(){
         return arguments;
     }
-    
-    /**
-     * 
-     * @param arguments
-     */
+
     public void setFlags( Flag[] flags ){
         this.flags = flags;
     }

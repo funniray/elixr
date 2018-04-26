@@ -1,8 +1,9 @@
 package us.dhmc.elixr;
 
+import cn.nukkit.Player;
+
 import java.util.Arrays;
 
-import org.bukkit.entity.Player;
 
 /**
 * Original implementation by desht
@@ -38,15 +39,15 @@ public class ExperienceUtils {
     public static void changeExp(Player player, int amt) {
             int xp = getCurrentExp(player) + amt;
             if (xp < 0) xp = 0;
-           
-            int curLvl = player.getLevel();
+
+        int curLvl = player.getExperienceLevel();
             int newLvl = getCurrentLevel(xp);
             if (curLvl != newLvl) {
-                    player.setLevel(newLvl);
+                player.setExperience(newLvl);
             }
-           
-            float pct = ((float)(xp - xpTotalToReachLevel[newLvl]) / (float)xpRequiredForNextLevel[newLvl]);
-            player.setExp(pct);
+
+        int pct = (int) ((float) (xp - xpTotalToReachLevel[newLvl]) / (float) xpRequiredForNextLevel[newLvl]);
+        player.setExperience(pct);
     }
    
     
@@ -56,8 +57,8 @@ public class ExperienceUtils {
      * @return
      */
     public static int getCurrentExp(Player player) {
-            int lvl = player.getLevel();
-            return xpTotalToReachLevel[lvl] + (int) (xpRequiredForNextLevel[lvl] * player.getExp());
+        int lvl = player.getExperienceLevel();
+        return xpTotalToReachLevel[lvl] + (int) (xpRequiredForNextLevel[lvl] * player.getExperience());
     }
    
     
